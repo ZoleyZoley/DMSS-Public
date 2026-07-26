@@ -301,7 +301,7 @@
 
     <div class="form-step" data-step="3">
       <h2 class="step-heading">Share Your Address</h2>
-      <p class="step-description">We'll connect you with the best opportunities in your area. You won't receive any marketing to your home.</p>
+      <p class="step-description">We'll connect you with the best opportunities in your area. You won't receive any marketing to your office or home.</p>
       <hr class="step-divider">
 
       <label for="country" class="required">Country</label>
