@@ -434,6 +434,7 @@
       backBtn.style.display = step === 1 ? 'none' : 'block';
       nextBtn.style.display = step === totalSteps ? 'none' : 'block';
       submitBtn.style.display = step === totalSteps ? 'block' : 'none';
+      form.scrollIntoView({ block: 'start' });
     }
 
     function validateStep1() {
