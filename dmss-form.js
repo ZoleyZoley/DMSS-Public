@@ -1,6 +1,6 @@
 (function () {
   var MOUNT_ID = 'dmss-lead-form';
-  var FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwvpGqd5L_G8iWThipTJSl5CzCCgG-Vcoviirfdl-ifbUG4LSeKPP0NQIybGUet7itByA/exec';
+  var FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzRg_yHC6Nqh6hDqgGRgk5B2HNDc4tHT7T4v40ComF7ep5AsTmTcwIj95o9EkO_ngGe/exec';
 
   var css = `
   .custom-form {
@@ -45,6 +45,13 @@
     color: #8aa39d;
   }
 
+  .custom-form .field-note {
+    margin: -14px 0 4px;
+    font-size: 12px;
+    color: #8aa39d;
+    line-height: 1.4;
+  }
+
   .custom-form select {
     appearance: none;
     -webkit-appearance: none;
@@ -72,6 +79,26 @@
 
   .custom-form select option:disabled {
     color: #9db8b2;
+  }
+
+  .custom-form .checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .custom-form .checkbox-row input[type=checkbox] {
+    width: auto;
+    margin: 3px 0 0;
+    flex-shrink: 0;
+  }
+
+  .custom-form .checkbox-row label {
+    display: inline;
+    margin: 0;
+    font-weight: 600;
+    color: #bfe3da;
   }
 
   .custom-form .step-heading {
@@ -157,6 +184,27 @@
 
   .custom-form .btn-primary:hover {
     background-color: #0f766e;
+  }
+
+  .custom-form .btn:disabled {
+    opacity: 0.75;
+    cursor: default;
+  }
+
+  .custom-form .btn-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-left: 8px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    vertical-align: middle;
+    animation: dmssBtnSpin 0.7s linear infinite;
+  }
+
+  @keyframes dmssBtnSpin {
+    to { transform: rotate(360deg); }
   }
 
   .custom-form .btn-secondary {
@@ -277,14 +325,32 @@
         <option value="Dental Assistant">Dental Assistant</option>
         <option value="Dental Hygienist">Dental Hygienist</option>
         <option value="Dentist">Dentist</option>
-        <option value="Dental Office">Dental Office</option>
       </select>
+
+      <label for="placementType" class="required">Type of Placement You're Looking For</label>
+      <select id="placementType" name="Placement Type" required>
+        <option value="" disabled hidden selected>Select an option</option>
+        <option value="Temporary Staffing">Temporary Staffing</option>
+        <option value="Permanent Placement">Permanent Placement</option>
+        <option value="Both">Both</option>
+        <option value="Not Sure Yet">Not Sure Yet</option>
+      </select>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="workedWithUsBefore" name="Worked With Us Before" value="Yes">
+        <label for="workedWithUsBefore">I've worked with Dental Medical Support Services before</label>
+      </div>
     </div>
 
     <div class="form-step" data-step="2">
       <h2 class="step-heading">How Can We Reach You?</h2>
       <p class="step-description">Share your contact info so we can follow up about next steps.</p>
       <hr class="step-divider">
+
+      <div id="officeNameWrap" style="display:none;">
+        <label for="officeName" class="required">Office Name</label>
+        <input type="text" id="officeName" name="Office Name" placeholder="Bright Smiles Dental">
+      </div>
 
       <label for="firstName" class="required">First Name</label>
       <input type="text" id="firstName" name="First Name" placeholder="John" required>
@@ -297,11 +363,12 @@
 
       <label for="email" class="required">Email</label>
       <input type="email" id="email" name="Email" placeholder="johnsmith@gmail.com" required>
+      <p class="field-note">We won't send you marketing materials — this is just so we can get in touch with you.</p>
     </div>
 
     <div class="form-step" data-step="3">
       <h2 class="step-heading">Share Your Address</h2>
-      <p class="step-description">We'll connect you with the best opportunities in your area. You won't receive any marketing to your office or home.</p>
+      <p class="step-description">We'll connect you with the best opportunities in your area.</p>
       <hr class="step-divider">
 
       <label for="country" class="required">Country</label>
@@ -381,7 +448,7 @@
     <div class="wizard-nav">
       <button type="button" id="backBtn" class="btn btn-secondary" style="display:none;">Back</button>
       <button type="button" id="nextBtn" class="btn btn-primary">Next</button>
-      <button type="submit" id="submitBtn" class="btn btn-primary" style="display:none;">Submit</button>
+      <button type="submit" id="submitBtn" class="btn btn-primary" style="display:none;"><span id="submitBtnLabel">Submit</span><span id="submitSpinner" class="btn-spinner" style="display:none;"></span></button>
     </div>
   </form>
 
@@ -407,6 +474,7 @@
     var stateField = root.querySelector('#state');
     var positionField = root.querySelector('#position');
     var visitorTypeField = root.querySelector('#visitorType');
+    var placementTypeField = root.querySelector('#placementType');
     var phoneField = root.querySelector('#phone');
     var firstNameField = root.querySelector('#firstName');
     var lastNameField = root.querySelector('#lastName');
@@ -414,6 +482,8 @@
     var address1Field = root.querySelector('#address1');
     var cityField = root.querySelector('#city');
     var zipField = root.querySelector('#zip');
+    var officeNameWrap = root.querySelector('#officeNameWrap');
+    var officeNameField = root.querySelector('#officeName');
 
     var steps = Array.from(root.querySelectorAll('.form-step'));
     var totalSteps = steps.length;
@@ -424,6 +494,26 @@
     var backBtn = root.querySelector('#backBtn');
     var nextBtn = root.querySelector('#nextBtn');
     var submitBtn = root.querySelector('#submitBtn');
+    var submitBtnLabel = root.querySelector('#submitBtnLabel');
+    var submitSpinner = root.querySelector('#submitSpinner');
+
+    function setSubmitLoading(isLoading) {
+      submitBtn.disabled = isLoading;
+      submitBtnLabel.textContent = isLoading ? 'Submitting…' : 'Submit';
+      submitSpinner.style.display = isLoading ? 'inline-block' : 'none';
+    }
+
+    // Office Name only makes sense for an Office visitor — shown on Step 2
+    // once Visitor Type is known, hidden and cleared for a Candidate so a
+    // stray value never gets submitted on their behalf.
+    function updateOfficeNameVisibility() {
+      var isOffice = visitorTypeField.value !== '' && visitorTypeField.value.indexOf('job seeker') === -1;
+      officeNameWrap.style.display = isOffice ? 'block' : 'none';
+      officeNameField.required = isOffice;
+      if (!isOffice) officeNameField.value = '';
+    }
+    visitorTypeField.addEventListener('change', updateOfficeNameVisibility);
+    updateOfficeNameVisibility();
 
     function showStep(step) {
       steps.forEach(function (s) {
@@ -446,10 +536,19 @@
         alert('Please select your position.');
         return false;
       }
+      if (!placementTypeField.value) {
+        alert('Please select the type of placement you\'re looking for.');
+        return false;
+      }
       return true;
     }
 
     function validateStep2() {
+      if (officeNameField.required && !officeNameField.value.trim()) {
+        alert('Please enter your office name.');
+        officeNameField.focus();
+        return false;
+      }
       if (!firstNameField.value.trim()) {
         alert('Please enter your first name.');
         firstNameField.focus();
@@ -522,16 +621,20 @@
 
       if (!validateStep3()) return;
 
+      setSubmitLoading(true);
+
       fetch(FORM_ENDPOINT, {
         method: 'POST',
         mode: 'no-cors',
         body: new FormData(form)
       }).then(function () {
+        setSubmitLoading(false);
         popupOverlay.style.display = 'flex';
         form.reset();
         currentStep = 1;
         showStep(currentStep);
       }).catch(function (error) {
+        setSubmitLoading(false);
         console.error('Error!', error.message);
       });
     });
