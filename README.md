@@ -52,10 +52,9 @@ console rather than showing a visitor a success it didn't earn.) Redeploying the
 as a *new* deployment changes the URL — update it here too. See the DMSS Job Order
 project's `SETUP.md` section 12.
 
-Separately, while `JobOrderIntake.gs`'s `WEB_FORM_TEST_MODE` is `true`, both the
-confirmation and the internal notification go only to ryan@zoley.io no matter what the
-submitter typed. The row still lands in the sheet. Set that flag to `false` to go fully
-live.
+Email is fully live as of 2026-09-23: `JobOrderIntake.gs`'s `WEB_FORM_TEST_MODE` is
+`false`, so a submitter gets their own confirmation and the new-order alert goes to the
+real staff addresses. Nothing the widget sends is redirected any more.
 
 ## Source of truth
 
