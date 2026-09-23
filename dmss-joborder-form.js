@@ -56,7 +56,11 @@
     --teal-soft:#bfe3da;
     --teal-soft2:#a8d0c6;
     --mint:#eef7f5;
-    --cream:#fbfaf7;
+    /* Mobile only: the flat area the form card sits on once the dark teal
+    panel is gone. Set to the Squarespace site background so the widget's
+    band and the page around it read as one surface, with no seam where
+    the widget ends. If the site background changes, change this. */
+    --sage:#d7e5dd;
     --ink:#163832;
     --ink-soft:#4a5c58;
     --gold:#c9992e;
@@ -602,8 +606,16 @@
     }
     /* Screen 2: the form, reached by scrolling (or tapping the button) */
     .dmss-jo .job-form-wrap {
-      background:var(--cream);
+      background:var(--sage);
       padding:48px 20px 64px;
+    }
+    /* The desktop card shadow is 40% black spread over 60px, tuned to read
+    against the dark teal panel. On this light background it renders as a
+    grey haze around the card — the halo is the shadow, not a background
+    colour, so recolouring the band alone would not remove it. Softened and
+    tinted toward the palette's dark teal so the card still lifts. */
+    .dmss-jo .custom-form {
+      box-shadow:0 10px 30px rgba(13,59,53,.10);
     }
   }
   /* Height-based, not width-based, on purpose: what runs out on a short
