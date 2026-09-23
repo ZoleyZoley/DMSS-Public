@@ -462,7 +462,9 @@
     background:var(--teal-hover);
   }
   .dmss-jo .wizard-nav {
-    display:flex;gap:12px;margin-top:4px;
+    /* Collapses with the preceding field's 16px margin-bottom, so this
+    value IS the gap above the buttons, not an addition to it. */
+    display:flex;gap:12px;margin-top:24px;
   }
   .dmss-jo .wizard-nav .jo-btn {
     flex:1;
